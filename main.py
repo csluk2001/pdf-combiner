@@ -2,12 +2,14 @@ import os
 import sys
 import logging
 
+from PyQt5.QtCore import Qt
+
 logging.basicConfig(level=logging.INFO)
 
 from pypdf import PdfMerger
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QApplication, QFileDialog, QMainWindow, QListWidget, QListWidgetItem, QPushButton, \
-    QVBoxLayout, QWidget, QDesktopWidget
+    QVBoxLayout, QWidget, QDesktopWidget, QHBoxLayout, QLabel
 
 # the tuple to save the selected pdf files
 pdf_list = []
@@ -35,6 +37,27 @@ def combine_files():
     logging.info(f"combined as {output_filename}.")
 
 
+class ListWidget(QListWidget):
+    def __init__(self):
+        super().__init__()
+
+        # Enable drag and drop mode
+        self.setDragDropMode(QListWidget.InternalMove)
+        # Set the selection mode to contiguous selection
+        self.setSelectionMode(QListWidget.ContiguousSelection)
+
+    def dropEvent(self, event):
+        """Called when an item is dropped onto the list widget"""
+        super().dropEvent(event)
+        self.updateSequence()
+
+    def updateSequence(self):
+        """Update the sequence of items in the list widget"""
+        items = [self.item(i) for i in range(self.count())]
+        for i, item in enumerate(items):
+            item.setData(Qt.UserRole, i)
+
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -47,7 +70,7 @@ class MainWindow(QMainWindow):
         self.open_button.clicked.connect(self.open_files)
 
         # Create a list widget to display the selected files
-        self.list_widget = QListWidget(self)
+        self.list_widget = ListWidget()
 
         # Create a button to clear all files
         self.clear_button = QPushButton('Clear', self)
@@ -95,6 +118,7 @@ class MainWindow(QMainWindow):
             item = QListWidgetItem(QIcon('pdf-icon.png'), file_name)
             if file_name not in pdf_list:
                 pdf_list.append(file_name)
+                item.setData(Qt.UserRole, len(pdf_list) + 1)
                 self.list_widget.addItem(item)
             else:
                 logging.info(f"Repeated file [{file_name}] is chosen")
