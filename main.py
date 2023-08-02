@@ -1,15 +1,14 @@
+import logging
 import os
 import sys
-import logging
 
 from PyQt5.QtCore import Qt
-
-logging.basicConfig(level=logging.INFO)
-
-from pypdf import PdfMerger
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QApplication, QFileDialog, QMainWindow, QListWidget, QListWidgetItem, QPushButton, \
-    QVBoxLayout, QWidget, QDesktopWidget, QHBoxLayout, QLabel
+    QVBoxLayout, QWidget, QDesktopWidget
+from pypdf import PdfMerger
+
+logging.basicConfig(level=logging.INFO)
 
 # the tuple to save the selected pdf files
 pdf_list = []
@@ -61,6 +60,15 @@ class ListWidget(QListWidget):
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+
+        # Set the window title
+        self.setWindowTitle('PDF Combiner')
+
+        # Create an icon object from the icon file
+        icon = QIcon('icon.png')
+
+        # Set the window icon
+        self.setWindowIcon(icon)
 
         # Set the initial size of the main window
         self.resize(800, 600)
@@ -115,7 +123,7 @@ class MainWindow(QMainWindow):
 
         # Add the selected file names to the list widget with PDF icon
         for file_name in file_names:
-            item = QListWidgetItem(QIcon('pdf-icon.png'), file_name)
+            item = QListWidgetItem(QIcon('icon.png'), file_name)
             if file_name not in pdf_list:
                 pdf_list.append(file_name)
                 item.setData(Qt.UserRole, len(pdf_list) + 1)
